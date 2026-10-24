@@ -1,0 +1,31 @@
+# Render Blueprint: creates the API and a Postgres database in one go.
+databases:
+  - name: inkproof-db
+    plan: free
+
+services:
+  - type: web
+    name: inkproof-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: DATABASE_URL
+        fromDatabase:
+          name: inkproof-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SEED_DEMO
+        value: "true"
+      - key: CORS_ORIGINS
+        sync: false        # set to your Vercel URL, e.g. https://inkproof.vercel.app
+      - key: ANTHROPIC_API_KEY
+        sync: false        # optional: enables "Run with AI review"
+      - key: AI_MODEL
+        value: claude-sonnet-5-5
