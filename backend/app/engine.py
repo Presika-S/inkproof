@@ -11,7 +11,12 @@ NUM_RE = re.compile(
     r"(\d+(?:\.\d+)?)\s*(%|stars?)(?:\s+in\s+(?:just\s+)?(\d+)\s*(week|day|month)s?)?",
     re.I,
 )
-RANK_RE = re.compile(r"(#\s?1|number one|no\.\s?1)[^.!?]*", re.I)
+
+RANK_RE = re.compile(
+    r"(#\s?1|number one|no\.?\s?1)[^.!?]*",
+    re.I,
+)
+
 NEEDS_HUMAN_LABELS = {"Unverified", "Expired", "AI-suggested"}
 
 
@@ -53,18 +58,18 @@ def candidates(text: str, rules: list[dict], facts: list[dict]) -> list[dict]:
                     )
 
     # Review claims sentence by sentence.
-    for s in re.split(r"(?<=[.!?])\s+", text):
-        lo = s.lower()
+    for sentence in re.split(r"(?<=[.!?])\s+", text):
+        lo = sentence.lower()
 
         # Check ranking claims.
-        rk = RANK_RE.search(s)
+        rk = RANK_RE.search(sentence)
         if rk:
             rf = next(
                 (
-                    f
-                    for f in facts
-                    if f["rank"]
-                    and any(k in lo for k in f["keywords"])
+                    fact
+                    for fact in facts
+                    if fact["rank"]
+                    and any(k in lo for k in fact["keywords"])
                 ),
                 None,
             )
@@ -87,53 +92,53 @@ def candidates(text: str, rules: list[dict], facts: list[dict]) -> list[dict]:
                     rf["id"],
                 )
 
-        # Check every numerical claim in the sentence.
-        for nm in NUM_RE.finditer(s):
-            v = float(nm.group(1))
+        # Check numerical claims.
+        for nm in NUM_RE.finditer(sentence):
+            value = float(nm.group(1))
             unit = "%" if nm.group(2) == "%" else "stars"
-            p = float(nm.group(3)) if nm.group(3) else None
+            period = float(nm.group(3)) if nm.group(3) else None
             claim_period_unit = nm.group(4)
-            q = nm.group(0)
+            quote = nm.group(0)
 
-            f = next(
+            fact = next(
                 (
-                    x
-                    for x in facts
-                    if x["unit"] == unit
-                    and any(k in lo for k in x["keywords"])
+                    item
+                    for item in facts
+                    if item["unit"] == unit
+                    and any(k in lo for k in item["keywords"])
                 ),
                 None,
             )
 
-            if not f:
+            if not fact:
                 add(
                     "R-NUM-01",
                     "Unverified",
-                    q,
+                    quote,
                     "No approved fact covers this figure. "
                     "It is not proven false, so a reviewer decides.",
                 )
 
-            elif is_expired(f):
+            elif is_expired(fact):
                 add(
                     "R-NUM-01",
                     "Expired",
-                    q,
-                    f"{f['id']} expired on {f['valid_until']}, "
+                    quote,
+                    f"{fact['id']} expired on {fact['valid_until']}, "
                     "so it cannot support this figure.",
                     None,
-                    f["id"],
+                    fact["id"],
                 )
 
-            elif v == f["value"] and (
-                not f["period"]
-                or p is None
+            elif value == fact["value"] and (
+                not fact["period"]
+                or period is None
                 or (
-                    p == f["period"]
+                    period == fact["period"]
                     and (
                         claim_period_unit is None
                         or claim_period_unit.lower().rstrip("s")
-                        == f["period_unit"].lower().rstrip("s")
+                        == fact["period_unit"].lower().rstrip("s")
                     )
                 )
             ):
@@ -141,50 +146,48 @@ def candidates(text: str, rules: list[dict], facts: list[dict]) -> list[dict]:
                 pass
 
             elif (
-                f["cumulative"]
-                and p is not None
-                and f["period"]
-                and v > f["value"]
+                fact["cumulative"]
+                and period is not None
+                and fact["period"]
+                and value > fact["value"]
             ):
-                # A larger number or shorter time period alone does not
-                # prove a claim false. Ask for evidence instead.
-                period_unit = claim_period_unit or f["period_unit"]
+                period_unit = claim_period_unit or fact["period_unit"]
 
                 add(
                     "R-NUM-01",
                     "Unverified",
-                    q,
-                    f"{f['id']}: {f['text']}. "
-                    f"The claim states {_num(v)}{unit} over "
-                    f"{_num(p)} {period_unit}(s), while the approved "
+                    quote,
+                    f"{fact['id']}: {fact['text']}. "
+                    f"The claim states {_num(value)}{unit} over "
+                    f"{_num(period)} {period_unit}(s), while the approved "
                     f"fact describes an average over "
-                    f"{_num(f['period'])} {f['period_unit']}(s). "
+                    f"{_num(fact['period'])} {fact['period_unit']}(s). "
                     "The available fact does not establish whether "
                     "this claim is true or false. Additional evidence "
                     "specific to this claim is required.",
                     None,
-                    f["id"],
+                    fact["id"],
                 )
 
             else:
                 add(
                     "R-NUM-01",
                     "Unverified",
-                    q,
-                    f"{f['id']} covers a different value or context. "
+                    quote,
+                    f"{fact['id']} covers a different value or context. "
                     "The available fact does not establish whether "
                     "this claim is true or false.",
                     None,
-                    f["id"],
+                    fact["id"],
                 )
 
     # Check excessive exclamation marks.
-    for i, m in enumerate(re.finditer(r"!+", text)):
-        if len(m.group(0)) > 1 or i > 0:
+    for i, match in enumerate(re.finditer(r"!+", text)):
+        if len(match.group(0)) > 1 or i > 0:
             add(
                 "R-TON-02",
                 "Tone",
-                m.group(0),
+                match.group(0),
                 "Only one exclamation mark is allowed, "
                 "and none inside a claim.",
                 ".",
@@ -206,7 +209,7 @@ def verify(
 
     fact = (
         next(
-            (x for x in facts if x["id"] == f.get("fact_id")),
+            (item for item in facts if item["id"] == f.get("fact_id")),
             None,
         )
         if f.get("fact_id")
@@ -237,9 +240,39 @@ def verify(
         and f["label"] not in NEEDS_HUMAN_LABELS
     )
 
+    # Improvement 2: expose the evidence behind every finding.
+    if fact:
+        if is_expired(fact):
+            evidence_status = "expired"
+        elif not fact["approved"]:
+            evidence_status = "unapproved"
+        else:
+            evidence_status = "linked"
+
+        evidence = {
+            "status": evidence_status,
+            "fact_id": fact["id"],
+            "text": fact["text"],
+            "version": fact.get("version"),
+            "approved": fact["approved"],
+            "valid_until": fact["valid_until"],
+            "expired": is_expired(fact),
+        }
+    else:
+        evidence = {
+            "status": "missing",
+            "fact_id": None,
+            "text": None,
+            "version": None,
+            "approved": False,
+            "valid_until": None,
+            "expired": False,
+        }
+
     return {
         **f,
         "checks": checks,
+        "evidence": evidence,
         "status": "confirmed" if confirmed else "human",
     }
 
