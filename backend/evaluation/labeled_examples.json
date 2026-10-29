@@ -1,0 +1,22 @@
+[
+  {"id":"E001","text":"We are the #1 learning app.","should_flag":true,"reason":"Unsupported ranking"},
+  {"id":"E002","text":"Students improve scores by 60% in just 2 weeks.","should_flag":true,"reason":"Number and period differ from approved fact"},
+  {"id":"E003","text":"Our guaranteed results help every student.","should_flag":true,"reason":"Absolute claim"},
+  {"id":"E004","text":"Rated 4.6 stars by parents.","should_flag":true,"reason":"Approved rating fact is expired"},
+  {"id":"E005","text":"This is world-class learning.","should_flag":true,"reason":"Hype term"},
+  {"id":"E006","text":"A best in class experience for everyone.","should_flag":true,"reason":"Hype term"},
+  {"id":"E007","text":"Students improve scores by 18% over an 8-week course.","should_flag":false,"reason":"Matches approved score fact"},
+  {"id":"E008","text":"Explore lessons at your own pace.","should_flag":false,"reason":"No configured risk detected"},
+  {"id":"E009","text":"Learn a little every day.","should_flag":false,"reason":"No configured risk detected"},
+  {"id":"E010","text":"Build confidence with practice.","should_flag":false,"reason":"No configured risk detected"},
+  {"id":"E011","text":"Our guaranteed study plan is simple.","should_flag":true,"reason":"Absolute claim"},
+  {"id":"E012","text":"Join the #1 choice for learners.","should_flag":true,"reason":"Unsupported ranking"},
+  {"id":"E013","text":"Students gain 30% in 4 weeks.","should_flag":true,"reason":"Number lacks matching approved context"},
+  {"id":"E014","text":"We offer short lessons and practice questions.","should_flag":false,"reason":"No configured risk detected"},
+  {"id":"E015","text":"A world-class way to study at home.","should_flag":true,"reason":"Hype term"},
+  {"id":"E016","text":"Practice whenever it suits you.","should_flag":false,"reason":"No configured risk detected"},
+  {"id":"E017","text":"Rated 4.6 stars by parents.","should_flag":true,"reason":"Expired rating evidence"},
+  {"id":"E018","text":"Students improve scores by 18% over an 8-week course!", "should_flag":false,"reason":"Matching approved fact and one exclamation mark"},
+  {"id":"E019","text":"Guaranteed progress with our daily lessons.","should_flag":true,"reason":"Absolute claim"},
+  {"id":"E020","text":"Start with a free practice lesson.","should_flag":false,"reason":"No configured risk detected"}
+]
