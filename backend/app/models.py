@@ -68,9 +68,10 @@ class Event(Base):
     rule_id: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
     draft_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     note: Mapped[str] = mapped_column(String(300), default="")
+    before_value: Mapped[str | None] = mapped_column(Text, nullable=True)
+    after_value: Mapped[str | None] = mapped_column(Text, nullable=True)
     user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
-
 
 class FactChange(Base):
     __tablename__ = "fact_changes"

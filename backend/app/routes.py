@@ -1,6 +1,7 @@
 
 
 import io
+import json
 from collections import defaultdict
 from copy import deepcopy
 
@@ -80,6 +81,8 @@ def _log(
     rule_id=None,
     draft_id=None,
     note="",
+    before_value=None,
+    after_value=None,
 ):
     db.add(
         m.Event(
@@ -87,10 +90,11 @@ def _log(
             rule_id=rule_id,
             draft_id=draft_id,
             note=note[:300],
+            before_value=before_value,
+            after_value=after_value,
             user_id=user.id if user else None,
         )
     )
-
 
 # ---------- auth ----------
 
@@ -191,14 +195,24 @@ def patch_fact(
     for d in affected:
         d.status = "recheck"
 
+    new_value = f"{body.value:g}, until {body.valid_until}"
     db.add(
         m.FactChange(
             fact_id=fact_id,
             old=old,
-            new=f"{body.value:g}, until {body.valid_until}",
+            new=new_value,
             drafts_affected=len(affected),
             user_id=user.id,
         )
+    )
+    _log(
+        db,
+        "fact_updated",
+        user,
+        rule_id=fact_id,
+        note=f"Fact updated; {len(affected)} draft(s) marked for recheck",
+        before_value=old,
+        after_value=new_value,
     )
 
     db.commit()
@@ -425,10 +439,7 @@ def decide(
     d = _get_draft(db, did)
 
     if d.author_id == user.id:
-        raise HTTPException(
-            403,
-            "You cannot review or approve your own draft",
-        )
+        raise HTTPException(403, "You cannot review or approve your own draft")
 
     if body.decision not in ("uphold", "waive"):
         raise HTTPException(400, "decision must be uphold or waive")
@@ -440,14 +451,24 @@ def decide(
         raise HTTPException(404, "No such finding")
 
     fs = deepcopy(d.findings)
-    fs[idx]["dec"] = {"d": body.decision, "note": body.note.strip()}
+    before = fs[idx].get("dec")
+    after = {"d": body.decision, "note": body.note.strip()}
+    fs[idx]["dec"] = after
     d.findings = fs
 
-    _log(db, body.decision, user, fs[idx]["rule_id"], d.id, body.note)
+    _log(
+        db,
+        body.decision,
+        user,
+        fs[idx]["rule_id"],
+        d.id,
+        body.note,
+        before_value=json.dumps(before, sort_keys=True) if before is not None else None,
+        after_value=json.dumps(after, sort_keys=True),
+    )
 
     db.commit()
     db.refresh(d)
-
     return _draft(d)
 
 
@@ -461,15 +482,10 @@ def finalize(
     d = _get_draft(db, did)
 
     if d.author_id == user.id:
-        raise HTTPException(
-            403,
-            "You cannot review or approve your own draft",
-        )
+        raise HTTPException(403, "You cannot review or approve your own draft")
 
     if body.status not in ("approved", "changes_requested"):
-        raise HTTPException(
-            400, "status must be approved or changes_requested"
-        )
+        raise HTTPException(400, "status must be approved or changes_requested")
 
     if body.status == "approved" and any(
         not f.get("dec") or f["dec"]["d"] != "waive"
@@ -480,12 +496,22 @@ def finalize(
             "Approval needs every finding waived with a written reason",
         )
 
+    before = d.status
     d.status = body.status
-    _log(db, "decision", user, None, d.id, body.status)
+
+    _log(
+        db,
+        "decision",
+        user,
+        None,
+        d.id,
+        body.status,
+        before_value=before,
+        after_value=body.status,
+    )
 
     db.commit()
     db.refresh(d)
-
     return _draft(d)
 
 
@@ -577,10 +603,14 @@ def insights(
 
     history = [
         dict(
+            id=e.id,
             type=e.type,
             rule_id=e.rule_id,
             draft_id=e.draft_id,
             note=e.note,
+            before_value=e.before_value,
+            after_value=e.after_value,
+            user_id=e.user_id,
             at=e.created_at.isoformat(),
         )
         for e in events[:12]
