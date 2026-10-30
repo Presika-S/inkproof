@@ -1,5 +1,6 @@
 
 """Rule engine: propose findings and independently verify them.
+
 Unsupported claims are not automatically treated as false.
 Pure functions on plain dicts so they are easy to test.
 """
@@ -27,6 +28,72 @@ def is_expired(fact: dict, today: str | None = None) -> bool:
 
 def _num(x: float) -> str:
     return str(int(x)) if float(x).is_integer() else str(x)
+
+
+def _select_numeric_fact(
+    facts: list[dict],
+    unit: str,
+    sentence: str,
+    value: float,
+    period: float | None,
+    claim_period_unit: str | None,
+) -> dict | None:
+    """Select the most relevant matching fact.
+
+    Prefer approved, current facts that match the claimed value and period.
+    When otherwise equivalent, prefer facts with current source provenance.
+    """
+
+    matching_facts = [
+        item
+        for item in facts
+        if item["unit"] == unit
+        and any(k in sentence for k in item["keywords"])
+    ]
+
+    if not matching_facts:
+        return None
+
+    def score(item: dict) -> tuple:
+        fact_period = item.get("period")
+        fact_period_unit = item.get("period_unit")
+
+        value_matches = value == item["value"]
+
+        period_matches = (
+            fact_period is None
+            or period is None
+            or (
+                period == fact_period
+                and (
+                    claim_period_unit is None
+                    or (
+                        fact_period_unit is not None
+                        and claim_period_unit.lower().rstrip("s")
+                        == fact_period_unit.lower().rstrip("s")
+                    )
+                )
+            )
+        )
+
+        sources = item.get("sources", [])
+        has_current_source = any(
+            not source.get("stale", False)
+            for source in sources
+        )
+
+        return (
+            bool(item.get("approved")),
+            not is_expired(item),
+            not item.get("source_stale", False),
+            value_matches,
+            period_matches,
+            has_current_source,
+            len([k for k in item["keywords"] if k in sentence]),
+            item.get("version", 0) or 0,
+        )
+
+    return max(matching_facts, key=score)
 
 
 def candidates(text: str, rules: list[dict], facts: list[dict]) -> list[dict]:
@@ -101,14 +168,13 @@ def candidates(text: str, rules: list[dict], facts: list[dict]) -> list[dict]:
             claim_period_unit = nm.group(4)
             quote = nm.group(0)
 
-            fact = next(
-                (
-                    item
-                    for item in facts
-                    if item["unit"] == unit
-                    and any(k in lo for k in item["keywords"])
-                ),
-                None,
+            fact = _select_numeric_fact(
+                facts=facts,
+                unit=unit,
+                sentence=lo,
+                value=value,
+                period=period,
+                claim_period_unit=claim_period_unit,
             )
 
             if not fact:
@@ -292,3 +358,92 @@ def review(
         verify(candidate, text, rules, facts)
         for candidate in candidates(text, rules, facts)
     ]
+
+def test_prefers_approved_fact_with_current_source():
+    from app import engine as eng
+
+    old_fact = {
+        "id": "F-012",
+        "text": "Average score gain: 18% over 8 weeks",
+        "keywords": ["score", "gain"],
+        "value": 18,
+        "unit": "%",
+        "period": 8,
+        "period_unit": "weeks",
+        "cumulative": True,
+        "rank": False,
+        "valid_until": "2027-12-31",
+        "approved": True,
+        "version": 1,
+        "sources": [],
+    }
+
+    sourced_fact = {
+        **old_fact,
+        "id": "F-7758A5CA6538",
+        "version": 1,
+        "sources": [
+            {
+                "filename": "inkproof-production-test.txt",
+                "source_quote": (
+                    "The average score gain was 18% over an 8-week course."
+                ),
+                "stale": False,
+            }
+        ],
+    }
+
+    selected = eng._select_numeric_fact(
+        facts=[old_fact, sourced_fact],
+        unit="%",
+        sentence="our score gain was 18% in 8 weeks",
+        value=18,
+        period=8,
+        claim_period_unit="weeks",
+    )
+
+    assert selected["id"] == "F-7758A5CA6538"
+def test_prefers_approved_fact_with_current_source():
+    from app import engine as eng
+
+    old_fact = {
+        "id": "F-012",
+        "text": "Average score gain: 18% over 8 weeks",
+        "keywords": ["score", "gain"],
+        "value": 18,
+        "unit": "%",
+        "period": 8,
+        "period_unit": "weeks",
+        "cumulative": True,
+        "rank": False,
+        "valid_until": "2027-12-31",
+        "approved": True,
+        "version": 1,
+        "sources": [],
+    }
+
+    sourced_fact = {
+        **old_fact,
+        "id": "F-7758A5CA6538",
+        "version": 1,
+        "sources": [
+            {
+                "filename": "inkproof-production-test.txt",
+                "source_quote": (
+                    "The average score gain was 18% over an 8-week course."
+                ),
+                "stale": False,
+            }
+        ],
+    }
+
+    selected = eng._select_numeric_fact(
+        facts=[old_fact, sourced_fact],
+        unit="%",
+        sentence="our score gain was 18% in 8 weeks",
+        value=18,
+        period=8,
+        claim_period_unit="weeks",
+    )
+
+    assert selected["id"] == "F-7758A5CA6538"

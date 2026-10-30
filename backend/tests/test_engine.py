@@ -135,3 +135,40 @@ def test_multiple_numbers_in_one_sentence():
     ]
 
     assert len(numeric) >= 2
+def test_prefers_approved_fact_with_current_source():
+    old_fact = {
+        "id": "F-012",
+        "text": "Average score gain: 18% over 8 weeks",
+        "keywords": ["score", "gain"],
+        "value": 18,
+        "unit": "%",
+        "period": 8,
+        "period_unit": "weeks",
+        "cumulative": True,
+        "rank": False,
+        "valid_until": "2027-12-31",
+        "approved": True,
+        "version": 1,
+        "sources": [],
+    }
+
+    sourced_fact = {
+        **old_fact,
+        "id": "F-7758A5CA6538",
+        "sources": [{
+            "filename": "inkproof-production-test.txt",
+            "source_quote": "The average score gain was 18% over an 8-week course.",
+            "stale": False,
+        }],
+    }
+
+    selected = eng._select_numeric_fact(
+        facts=[old_fact, sourced_fact],
+        unit="%",
+        sentence="our score gain was 18% in 8 weeks",
+        value=18,
+        period=8,
+        claim_period_unit="weeks",
+    )
+
+    assert selected["id"] == "F-7758A5CA6538"
