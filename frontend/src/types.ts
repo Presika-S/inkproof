@@ -8,6 +8,15 @@ export interface User {
   role: Role;
 }
 
+export interface EvidenceSource {
+  document_id: string;
+  filename: string | null;
+  source_quote: string;
+  document_version: number;
+  current_document_version: number | null;
+  stale: boolean;
+}
+
 export interface Finding {
   id: string;
   rule_id: string;
@@ -24,13 +33,14 @@ export interface Finding {
     context: boolean;
   };
   evidence?: {
-    status: "linked" | "expired" | "unapproved" | "missing";
+    status: "linked" | "expired" | "unapproved" | "missing" | "stale";
     fact_id: string | null;
     text: string | null;
     version: number | null;
     approved: boolean;
     valid_until: string | null;
     expired: boolean;
+    sources: EvidenceSource[];
   };
   dec?: { d: "uphold" | "waive"; note: string } | null;
   disputed?: boolean;

@@ -34,7 +34,9 @@ def _rule(r: m.Rule) -> dict:
     )
 
 
-def _fact(f: m.Fact) -> dict:
+def _fact(f: m.Fact, sources: list[dict] | None = None) -> dict:
+    sources = sources or []
+
     return dict(
         id=f.id,
         text=f.text,
@@ -50,15 +52,59 @@ def _fact(f: m.Fact) -> dict:
         version=f.version,
         approved=f.approved,
         expired=eng.is_expired(dict(valid_until=f.valid_until)),
+        sources=sources,
+        source_stale=bool(sources) and all(
+            source["stale"] for source in sources
+        ),
     )
 
 
 def _lib(db: Session):
-    return (
-        [_rule(r) for r in db.scalars(select(m.Rule).order_by(m.Rule.id))],
-        [_fact(f) for f in db.scalars(select(m.Fact).order_by(m.Fact.id))],
+    rules = [
+        _rule(r)
+        for r in db.scalars(select(m.Rule).order_by(m.Rule.id))
+    ]
+
+    facts = list(
+        db.scalars(select(m.Fact).order_by(m.Fact.id))
     )
 
+    links = list(db.scalars(select(m.FactEvidence)))
+    documents = {
+        document.id: document
+        for document in db.scalars(select(m.EvidenceDocument))
+    }
+
+    sources_by_fact = defaultdict(list)
+
+    for link in links:
+        document = documents.get(link.document_id)
+
+        stale = (
+            link.stale
+            or document is None
+            or document.status != "active"
+            or document.version != link.source_version
+        )
+
+        sources_by_fact[link.fact_id].append({
+            "document_id": link.document_id,
+            "filename": document.filename if document else None,
+            "source_quote": link.source_quote,
+            "document_version": link.source_version,
+            "current_document_version": (
+                document.version if document else None
+            ),
+            "stale": stale,
+        })
+
+    return (
+        rules,
+        [
+            _fact(f, sources_by_fact.get(f.id, []))
+            for f in facts
+        ],
+    )
 
 def _draft(d: m.Draft) -> dict:
     return dict(
