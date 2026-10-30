@@ -40,3 +40,31 @@ def test_full_workflow():
         assert c.get("/api/drafts", headers=w).json()[0]["status"] == "recheck"
         ins = c.get("/api/insights", headers=w).json()
         assert any(h["overridden"] for h in ins["health"]) and ins["fact_changes"]
+def test_reviewer_cannot_review_or_approve_own_draft():
+    with TestClient(app) as c:
+        reviewer = login(c, "reviewer")
+
+        draft = c.post(
+            "/api/drafts",
+            json={
+                "text": TEXT,
+                "intent": {"cta": "Sign up now"},
+            },
+            headers=reviewer,
+        ).json()
+
+        draft_id = draft["id"]
+
+        decision = c.post(
+            f"/api/drafts/{draft_id}/findings/0/decision",
+            json={"decision": "waive", "note": "Self-review test"},
+            headers=reviewer,
+        )
+        assert decision.status_code == 403
+
+        finalize = c.post(
+            f"/api/drafts/{draft_id}/finalize",
+            json={"status": "approved"},
+            headers=reviewer,
+        )
+        assert finalize.status_code == 403

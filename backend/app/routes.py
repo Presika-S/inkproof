@@ -1,4 +1,5 @@
 
+
 import io
 from collections import defaultdict
 from copy import deepcopy
@@ -423,6 +424,12 @@ def decide(
 ):
     d = _get_draft(db, did)
 
+    if d.author_id == user.id:
+        raise HTTPException(
+            403,
+            "You cannot review or approve your own draft",
+        )
+
     if body.decision not in ("uphold", "waive"):
         raise HTTPException(400, "decision must be uphold or waive")
 
@@ -452,6 +459,12 @@ def finalize(
     user: m.User = Depends(require_reviewer),
 ):
     d = _get_draft(db, did)
+
+    if d.author_id == user.id:
+        raise HTTPException(
+            403,
+            "You cannot review or approve your own draft",
+        )
 
     if body.status not in ("approved", "changes_requested"):
         raise HTTPException(
