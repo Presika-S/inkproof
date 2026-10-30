@@ -20,6 +20,7 @@ export default function FindingCard({
     expired: "Evidence expired",
     unapproved: "Evidence not approved",
     missing: "Evidence missing",
+    stale: "Source document outdated",
   };
 
   return (
@@ -28,6 +29,7 @@ export default function FindingCard({
         <span className={`badge ${f.status}`}>
           {f.status === "confirmed" ? "CONFIRMED" : "NEEDS HUMAN REVIEW"}
         </span>
+
         <b>
           {f.label}: “{f.quote}”
         </b>
@@ -77,6 +79,44 @@ export default function FindingCard({
             <p>
               <b>Valid until:</b> {evidence.valid_until ?? "Not specified"}
             </p>
+
+            {evidence.sources?.length > 0 && (
+              <div className="source-details">
+                <h4>Source documents</h4>
+
+                {evidence.sources.map((source, index) => (
+                  <div
+                    key={`${source.document_id}-${index}`}
+                    className="source-item"
+                  >
+                    <p>
+                      <b>Document:</b>{" "}
+                      {source.filename ?? "Document unavailable"}
+                    </p>
+
+                    <p>
+                      <b>Original source quote:</b>
+                    </p>
+
+                    <blockquote>{source.source_quote}</blockquote>
+
+                    <p>
+                      <b>Document version:</b> {source.document_version}
+                      {" · "}
+                      <b>Current version:</b>{" "}
+                      {source.current_document_version ?? "Unavailable"}
+                    </p>
+
+                    {source.stale && (
+                      <p role="alert" className="source-warning">
+                        ⚠ This source document is outdated. A reviewer should
+                        verify the updated evidence before relying on this fact.
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
 

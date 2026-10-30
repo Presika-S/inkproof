@@ -7,6 +7,7 @@ Pure functions on plain dicts so they are easy to test.
 import re
 from datetime import date
 
+
 NUM_RE = re.compile(
     r"(\d+(?:\.\d+)?)\s*(%|stars?)(?:\s+in\s+(?:just\s+)?(\d+)\s*(week|day|month)s?)?",
     re.I,
@@ -48,12 +49,12 @@ def candidates(text: str, rules: list[dict], facts: list[dict]) -> list[dict]:
     for r in rules:
         if r["kind"] == "term":
             for term, repl in r["config"].get("terms", {}).items():
-                for m in re.finditer(re.escape(term), text, re.I):
+                for match in re.finditer(re.escape(term), text, re.I):
                     add(
                         r["id"],
                         "Banned term",
-                        m.group(0),
-                        f"“{m.group(0)}” is an absolute or hype term.",
+                        match.group(0),
+                        f"“{match.group(0)}” is an absolute or hype term.",
                         repl,
                     )
 
@@ -226,6 +227,7 @@ def verify(
                 fact
                 and fact["approved"]
                 and not is_expired(fact)
+                and not fact.get("source_stale", False)
             )
         ),
         "context": (
@@ -240,12 +242,14 @@ def verify(
         and f["label"] not in NEEDS_HUMAN_LABELS
     )
 
-    # Improvement 2: expose the evidence behind every finding.
+    # Expose the evidence behind every finding.
     if fact:
         if is_expired(fact):
             evidence_status = "expired"
         elif not fact["approved"]:
             evidence_status = "unapproved"
+        elif fact.get("source_stale", False):
+            evidence_status = "stale"
         else:
             evidence_status = "linked"
 
@@ -257,6 +261,7 @@ def verify(
             "approved": fact["approved"],
             "valid_until": fact["valid_until"],
             "expired": is_expired(fact),
+            "sources": fact.get("sources", []),
         }
     else:
         evidence = {
@@ -267,6 +272,7 @@ def verify(
             "approved": False,
             "valid_until": None,
             "expired": False,
+            "sources": [],
         }
 
     return {

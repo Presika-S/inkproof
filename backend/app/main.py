@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .db import Base, SessionLocal, engine
 from .routes import router
+from .evidence import router as evidence_router
 from .seed import seed
 
 
@@ -20,6 +21,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Inkproof API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["*"], allow_headers=["*"])
 app.include_router(router)
+app.include_router(evidence_router)
 
 
 @app.get("/healthz")
