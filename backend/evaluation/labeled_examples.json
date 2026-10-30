@@ -1,22 +1,422 @@
 [
-  {"id":"E001","text":"We are the #1 learning app.","should_flag":true,"reason":"Unsupported ranking"},
-  {"id":"E002","text":"Students improve scores by 60% in just 2 weeks.","should_flag":true,"reason":"Number and period differ from approved fact"},
-  {"id":"E003","text":"Our guaranteed results help every student.","should_flag":true,"reason":"Absolute claim"},
-  {"id":"E004","text":"Rated 4.6 stars by parents.","should_flag":true,"reason":"Approved rating fact is expired"},
-  {"id":"E005","text":"This is world-class learning.","should_flag":true,"reason":"Hype term"},
-  {"id":"E006","text":"A best in class experience for everyone.","should_flag":true,"reason":"Hype term"},
-  {"id":"E007","text":"Students improve scores by 18% over an 8-week course.","should_flag":false,"reason":"Matches approved score fact"},
-  {"id":"E008","text":"Explore lessons at your own pace.","should_flag":false,"reason":"No configured risk detected"},
-  {"id":"E009","text":"Learn a little every day.","should_flag":false,"reason":"No configured risk detected"},
-  {"id":"E010","text":"Build confidence with practice.","should_flag":false,"reason":"No configured risk detected"},
-  {"id":"E011","text":"Our guaranteed study plan is simple.","should_flag":true,"reason":"Absolute claim"},
-  {"id":"E012","text":"Join the #1 choice for learners.","should_flag":true,"reason":"Unsupported ranking"},
-  {"id":"E013","text":"Students gain 30% in 4 weeks.","should_flag":true,"reason":"Number lacks matching approved context"},
-  {"id":"E014","text":"We offer short lessons and practice questions.","should_flag":false,"reason":"No configured risk detected"},
-  {"id":"E015","text":"A world-class way to study at home.","should_flag":true,"reason":"Hype term"},
-  {"id":"E016","text":"Practice whenever it suits you.","should_flag":false,"reason":"No configured risk detected"},
-  {"id":"E017","text":"Rated 4.6 stars by parents.","should_flag":true,"reason":"Expired rating evidence"},
-  {"id":"E018","text":"Students improve scores by 18% over an 8-week course!", "should_flag":false,"reason":"Matching approved fact and one exclamation mark"},
-  {"id":"E019","text":"Guaranteed progress with our daily lessons.","should_flag":true,"reason":"Absolute claim"},
-  {"id":"E020","text":"Start with a free practice lesson.","should_flag":false,"reason":"No configured risk detected"}
+  {
+    "id": "E001",
+    "text": "We are the #1 learning app.",
+    "should_flag": true,
+    "reason": "Unsupported ranking",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E002",
+    "text": "Students improve scores by 60% in just 2 weeks.",
+    "should_flag": true,
+    "reason": "Number and period differ from approved fact",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E003",
+    "text": "Our guaranteed results help every student.",
+    "should_flag": true,
+    "reason": "Absolute claim",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E004",
+    "text": "Rated 4.6 stars by parents.",
+    "should_flag": true,
+    "reason": "Approved rating fact is expired",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E005",
+    "text": "This is world-class learning.",
+    "should_flag": true,
+    "reason": "Hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E006",
+    "text": "A best in class experience for everyone.",
+    "should_flag": true,
+    "reason": "Hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E007",
+    "text": "Students improve scores by 18% over an 8-week course.",
+    "should_flag": false,
+    "reason": "Matches approved score fact",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E008",
+    "text": "Explore lessons at your own pace.",
+    "should_flag": false,
+    "reason": "No configured risk detected",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E009",
+    "text": "Learn a little every day.",
+    "should_flag": false,
+    "reason": "No configured risk detected",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E010",
+    "text": "Build confidence with practice.",
+    "should_flag": false,
+    "reason": "No configured risk detected",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E011",
+    "text": "Our guaranteed study plan is simple.",
+    "should_flag": true,
+    "reason": "Absolute claim",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E012",
+    "text": "Join the #1 choice for learners.",
+    "should_flag": true,
+    "reason": "Unsupported ranking",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E013",
+    "text": "Students gain 30% in 4 weeks.",
+    "should_flag": true,
+    "reason": "Number lacks matching approved context",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E014",
+    "text": "We offer short lessons and practice questions.",
+    "should_flag": false,
+    "reason": "No configured risk detected",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E015",
+    "text": "A world-class way to study at home.",
+    "should_flag": true,
+    "reason": "Hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E016",
+    "text": "Practice whenever it suits you.",
+    "should_flag": false,
+    "reason": "No configured risk detected",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E017",
+    "text": "Rated 4.6 stars by parents.",
+    "should_flag": true,
+    "reason": "Expired rating evidence",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E018",
+    "text": "Students improve scores by 18% over an 8-week course!",
+    "should_flag": false,
+    "reason": "Matching approved fact and one exclamation mark",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E019",
+    "text": "Guaranteed progress with our daily lessons.",
+    "should_flag": true,
+    "reason": "Absolute claim",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E020",
+    "text": "Start with a free practice lesson.",
+    "should_flag": false,
+    "reason": "No configured risk detected",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E021",
+    "text": "Our guaranteed learning program delivers results.",
+    "should_flag": true,
+    "reason": "Absolute claim",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E022",
+    "text": "Experience a world-class learning platform.",
+    "should_flag": true,
+    "reason": "Hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E023",
+    "text": "This is the best in class study experience.",
+    "should_flag": true,
+    "reason": "Hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E024",
+    "text": "We offer guaranteed progress for learners.",
+    "should_flag": true,
+    "reason": "Absolute claim",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E025",
+    "text": "Discover our world-class practice lessons.",
+    "should_flag": true,
+    "reason": "Hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E026",
+    "text": "Explore lessons at your preferred pace.",
+    "should_flag": false,
+    "reason": "No configured hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E027",
+    "text": "Practice mathematics with guided exercises.",
+    "should_flag": false,
+    "reason": "No configured hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E028",
+    "text": "Build knowledge through regular study.",
+    "should_flag": false,
+    "reason": "No configured hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E029",
+    "text": "Review lessons and complete practice questions.",
+    "should_flag": false,
+    "reason": "No configured hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E030",
+    "text": "Learn new concepts with interactive activities.",
+    "should_flag": false,
+    "reason": "No configured hype term",
+    "rule_id": "R-TERM-01"
+  },
+  {
+    "id": "E031",
+    "text": "We are #1 among learning platforms.",
+    "should_flag": true,
+    "reason": "Unsupported ranking",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E032",
+    "text": "Our app is number one for learners.",
+    "should_flag": true,
+    "reason": "Unsupported ranking",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E033",
+    "text": "We are #1 among learning platforms.",
+    "should_flag": true,
+    "reason": "Unsupported ranking",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E034",
+    "text": "Become part of the #1 learning community.",
+    "should_flag": true,
+    "reason": "Unsupported ranking",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E035",
+    "text": "We are number one in education.",
+    "should_flag": true,
+    "reason": "Unsupported ranking",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E036",
+    "text": "Our platform provides interactive lessons.",
+    "should_flag": false,
+    "reason": "No ranking claim",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E037",
+    "text": "Students can practice with learning exercises.",
+    "should_flag": false,
+    "reason": "No ranking claim",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E038",
+    "text": "Explore courses designed for independent study.",
+    "should_flag": false,
+    "reason": "No ranking claim",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E039",
+    "text": "Our lessons support daily learning.",
+    "should_flag": false,
+    "reason": "No ranking claim",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E040",
+    "text": "Learn through videos and practice questions.",
+    "should_flag": false,
+    "reason": "No ranking claim",
+    "rule_id": "R-CLM-03"
+  },
+  {
+    "id": "E041",
+    "text": "Our score gain was 22%.",
+    "should_flag": true,
+    "reason": "Number differs from approved fact",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E042",
+    "text": "Students improve scores by 60% in 2 weeks.",
+    "should_flag": true,
+    "reason": "Number and period differ from approved fact",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E043",
+    "text": "Our score gain was 18% in 2 weeks.",
+    "should_flag": true,
+    "reason": "Period differs from approved fact",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E044",
+    "text": "Our learning progress reaches 75%.",
+    "should_flag": true,
+    "reason": "No matching approved numerical fact",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E045",
+    "text": "Rated 4.6 stars by our customers.",
+    "should_flag": true,
+    "reason": "Rating evidence is expired",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E046",
+    "text": "Students improve scores by 18%.",
+    "should_flag": false,
+    "reason": "Matches approved numerical value",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E047",
+    "text": "Our score gain is 18% for learners.",
+    "should_flag": false,
+    "reason": "Matches approved numerical value",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E048",
+    "text": "The average score improvement is 18%.",
+    "should_flag": false,
+    "reason": "Matches approved numerical value",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E049",
+    "text": "Students achieve an average score gain of 18%.",
+    "should_flag": false,
+    "reason": "Matches approved numerical value",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E050",
+    "text": "Average score gain reaches 18% over an 8-week course.",
+    "should_flag": false,
+    "reason": "Matches approved numerical value",
+    "rule_id": "R-NUM-01"
+  },
+  {
+    "id": "E051",
+    "text": "Start learning now!!",
+    "should_flag": true,
+    "reason": "Repeated exclamation marks",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E052",
+    "text": "Amazing results! Start today!",
+    "should_flag": true,
+    "reason": "Multiple exclamation marks",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E053",
+    "text": "Explore lessons!!!",
+    "should_flag": true,
+    "reason": "Repeated exclamation marks",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E054",
+    "text": "Learn more! Join us!",
+    "should_flag": true,
+    "reason": "Multiple exclamation marks",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E055",
+    "text": "Practice now!!!!",
+    "should_flag": true,
+    "reason": "Repeated exclamation marks",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E056",
+    "text": "Start learning today!",
+    "should_flag": false,
+    "reason": "One trailing exclamation mark",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E057",
+    "text": "Explore our learning platform.",
+    "should_flag": false,
+    "reason": "No exclamation marks",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E058",
+    "text": "Practice a new lesson every day.",
+    "should_flag": false,
+    "reason": "No exclamation marks",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E059",
+    "text": "Discover interactive exercises!",
+    "should_flag": false,
+    "reason": "One trailing exclamation mark",
+    "rule_id": "R-TON-02"
+  },
+  {
+    "id": "E060",
+    "text": "Build your knowledge with practice.",
+    "should_flag": false,
+    "reason": "No exclamation marks",
+    "rule_id": "R-TON-02"
+  }
 ]
